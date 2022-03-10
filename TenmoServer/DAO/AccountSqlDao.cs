@@ -30,7 +30,7 @@ namespace TenmoServer.DAO
                     cmd.Parameters.AddWithValue("@user_id", id);
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    if (reader.Read())
+                    while (reader.Read())
                     {
                         
                         int accountID = Convert.ToInt32(reader["account_id"]);

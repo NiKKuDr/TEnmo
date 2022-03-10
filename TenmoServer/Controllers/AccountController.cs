@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace TenmoServer.Controllers
 {
     [Authorize]
-    [Route("account")]
+    [Route("[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -36,6 +36,12 @@ namespace TenmoServer.Controllers
                 return NotFound();
             }
         }
-        
+
+        [HttpGet("whoami")]
+        public ActionResult WhoAmI()
+        {
+            return Ok(User.Identity.Name);
+        }
+
     }
 }
