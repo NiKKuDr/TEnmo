@@ -52,7 +52,19 @@ namespace TenmoClient.Services
         }
 
         // Add application-specific UI methods here...
+        public void PrintBalance(decimal balance)
+        {
+            Console.WriteLine(balance);
+            Pause();
+        }
 
-
+        public void PrintUsernames(List<Account> accounts)
+        {
+            for (int i = 0; i < accounts.Count; i++)
+            {
+                Console.Write(i + 1 + ") ");
+                Console.WriteLine(accounts[i].UserName);
+            }
+        }
     }
 }
