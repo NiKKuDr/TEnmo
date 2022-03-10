@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using TenmoServer.DAO;
@@ -7,6 +8,7 @@ using TenmoServer.Security;
 
 namespace TenmoServer.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -16,6 +18,7 @@ namespace TenmoServer.Controllers
         {
             AccountSqlDao = accountDao;
         }
+
         [HttpGet("{id}")]
         public Account GetAccount(int id)
         {
