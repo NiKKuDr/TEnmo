@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using TenmoServer.Models;
 
 namespace TenmoServer.DAO
 {
     public interface IAccountDao
     {
-        Account GetAccount(int user_id);
+        Account GetAccount(int id);
     }
 }
