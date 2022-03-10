@@ -73,7 +73,9 @@ namespace TenmoClient
 
             if (menuSelection == 1)
             {
-                Console.WriteLine(tenmoApiService.GetAccount());
+                Account account = (tenmoApiService.GetAccount());
+                Console.WriteLine(account.Balance);
+                console.Pause();
             }
 
             if (menuSelection == 2)

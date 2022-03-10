@@ -26,7 +26,8 @@ namespace TenmoServer.DAO
                     SqlCommand cmd = new SqlCommand("SELECT * FROM account WHERE user_id = @id", conn);
                     cmd.Parameters.AddWithValue("@id", id);
                     SqlDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read())
+
+                    if (reader.Read())
                     {
                         returnAccount.AccountId = Convert.ToInt32(reader["account_id"]);
                         returnAccount.UserId = Convert.ToInt32(reader["user_id"]);

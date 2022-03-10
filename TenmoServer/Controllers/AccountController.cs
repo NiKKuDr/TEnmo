@@ -12,9 +12,9 @@ namespace TenmoServer.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountDao AccountSqlDao;
-        public AccountController(AccountSqlDao accountSqlDao)
+        public AccountController(IAccountDao accountDao)
         {
-            AccountSqlDao = accountSqlDao;
+            AccountSqlDao = accountDao;
         }
         [HttpGet("{id}")]
         public Account GetAccount(int id)
