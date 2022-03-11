@@ -15,11 +15,13 @@ namespace TenmoServer.DAO
         {
             connectionString = dbConnectionString;
         }
-        public bool SendFunds(decimal transferAmount, int senderId, int recipientId)
+        public Transfer SendFunds(decimal transferAmount, int senderId, int recipientId)
         {
+            Transfer transfer = new Transfer();
+            int transferId = -1;
             if (transferAmount <= 0 || GetAccount(senderId).Balance < transferAmount)
             {
-                return false;
+                return null;
             }
             else
             {
@@ -45,12 +47,14 @@ namespace TenmoServer.DAO
                                 cmd.ExecuteNonQuery();
 
                                 cmd = new SqlCommand("INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
+                                    "OUTPUT inserted.transfer_id " +
                                     "VALUES (2, 2, @senderAccountId, @recipientAccountId, @transferAmount);", conn);
                                 cmd.Parameters.AddWithValue("@senderAccountId", fromAccount.AccountId);
                                 cmd.Parameters.AddWithValue("@recipientAccountId", toAccount.AccountId);
                                 cmd.Parameters.AddWithValue("@transferAmount", transferAmount);
-                                cmd.ExecuteNonQuery();
+                                transferId = Convert.ToInt32(cmd.ExecuteScalar());
 
+                                
                                 transaction.Complete();
                             }
                             catch (Exception exception2)
@@ -59,7 +63,7 @@ namespace TenmoServer.DAO
                                 Console.WriteLine("  Message: {0}", exception2.Message);
                                 transaction.Dispose();
 
-                                return false;
+                                return null;
                             }
 
                         }
@@ -68,10 +72,11 @@ namespace TenmoServer.DAO
                 catch (SqlException exception)
                 {
                     Console.WriteLine(exception.Message);
-                    return false;
+                    return null;
                 }
             }
-            return true;
+            transfer = GetTransferById(transferId);
+            return transfer;
         }
     
         public Account GetAccount(int id)
@@ -103,7 +108,6 @@ namespace TenmoServer.DAO
         }
         public List<Transfer> GetTransfers(int userId)
         {
-            int accountId = GetAccount(userId).AccountId;
             List<Transfer> transfers = new List<Transfer>();
             try
             {
@@ -111,31 +115,28 @@ namespace TenmoServer.DAO
                 {
                     conn.Open();
 
-                    SqlCommand cmd = new SqlCommand("SELECT t.transfer_type_id, t.transfer_status_id, t.transfer_id, t.account_to, t.account_from, t.amount, u.username " +
-                        "FROM transfer t " +
-                        "JOIN account a " +
-                        "ON t.account_to = a.account_id OR t.account_from = a.account_id " +
-                        "JOIN tenmo_user u ON a.user_id = u.user_id " +
-                        "JOIN transfer_type ty " +
-                        "ON t.transfer_type_id = ty.transfer_type_id " +
-                        "JOIN transfer_status ts " +
-                        "ON t.transfer_status_id = ts.transfer_status_id " +
-                        "WHERE (t.account_to = @accountId OR t.account_from = @accountID) AND a.user_id != @userId", conn);
+                    string cmdString = "SELECT t.transfer_id, t.amount, tu_from.username AS from_user, tu_to.username AS to_user, tt.transfer_type_desc, ts.transfer_status_desc " +
+                        "from transfer t " +
+                        "join account a_from " +
+                        "on a_from.account_id = t.account_from " +
+                        "join account a_to " +
+                        "on a_to.account_id = t.account_to " +
+                        "join tenmo_user tu_from " +
+                        "on tu_from.user_id = a_from.user_id " +
+                        "join tenmo_user tu_to " +
+                        "on tu_to.user_id = a_to.user_id " +
+                        "join transfer_status ts " +
+                        "on ts.transfer_status_id = t.transfer_status_id " +
+                        "join transfer_type tt " +
+                        "on tt.transfer_type_id = t.transfer_type_id " +
+                        "WHERE tu_from.user_id = @userId OR tu_to.user_id = @userId;";
+                    SqlCommand cmd = new SqlCommand(cmdString, conn);
                     cmd.Parameters.AddWithValue("@userId", userId);
-                    cmd.Parameters.AddWithValue("@accountId", accountId);
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())
                     {
-                        Transfer transfer = new Transfer();
-                        transfer.TransferId = Convert.ToInt32(reader["transfer_id"]);
-                        transfer.TransferType = Convert.ToInt32(reader["transfer_type_id"]);
-                        transfer.TransferStatus = Convert.ToInt32(reader["transfer_status_id"]);
-                        transfer.AccountTo = Convert.ToInt32(reader["account_to"]);
-                        transfer.AccountFrom = Convert.ToInt32(reader["account_from"]);
-                        transfer.Amount = Convert.ToDecimal(reader["amount"]);
-                        transfer.OtherUserUsername = Convert.ToString(reader["username"]);
-                        transfers.Add(transfer);
+                        transfers.Add(CreateTransferFromReader(reader));
                     }
                 }
             }
@@ -161,21 +162,25 @@ namespace TenmoServer.DAO
                     
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    if (reader.Read())
-                    {
-                        transfer.TransferId = Convert.ToInt32(reader["transfer_id"]);
-                        transfer.TransferType = Convert.ToInt32(reader["transfer_type_id"]);
-                        transfer.TransferStatus = Convert.ToInt32(reader["transfer_status_id"]);
-                        transfer.AccountTo = Convert.ToInt32(reader["account_to"]);
-                        transfer.AccountFrom = Convert.ToInt32(reader["account_from"]);
-                        transfer.Amount = Convert.ToDecimal(reader["amount"]);
-                    }
+                    
                 }
             }
             catch (SqlException)
             {
                 throw;
             }
+            return transfer;
+        }
+        public Transfer CreateTransferFromReader(SqlDataReader reader)
+        {
+            Transfer transfer = new Transfer();
+            transfer.TransferId = Convert.ToInt32(reader["transfer_id"]);
+            transfer.TransferType = Convert.ToString(reader["transfer_type_desc"]);
+            transfer.TransferStatus = Convert.ToString(reader["transfer_status_desc"]);
+            transfer.UserTo = Convert.ToString(reader["to_user"]);
+            transfer.UserFrom = Convert.ToString(reader["from_user"]);
+            transfer.Amount = Convert.ToDecimal(reader["amount"]);
+            
             return transfer;
         }
     }

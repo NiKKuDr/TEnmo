@@ -25,14 +25,14 @@ namespace TenmoClient.Services
             CheckForError(response);
             return response.Data;
         }
-        public bool TransferFunds(int accountToId, decimal transferAmount)
+        public Transfer TransferFunds(int accountToId, decimal transferAmount)
         {
             RestRequest request = new RestRequest("transfer/send");
-            Transfer transfer = new Transfer();
+            TransferById transfer = new TransferById();
             transfer.AccountTo = accountToId;
             transfer.Amount = transferAmount;
             request.AddJsonBody(transfer);
-            IRestResponse<bool> response = client.Post<bool>(request);
+            IRestResponse<Transfer> response = client.Post<Transfer>(request);
             CheckForError(response);
             return response.Data;
         }

@@ -20,7 +20,7 @@ namespace TenmoServer.Controllers
             TransferDao = transferDao;
         }
         [HttpPost("send")]
-        public bool SendFunds(Transfer transfer)
+        public Transfer SendFunds(TransferById transfer)
         {
             return TransferDao.SendFunds(transfer.Amount, GetUserIdFromToken(), transfer.AccountTo);
         }
@@ -44,7 +44,7 @@ namespace TenmoServer.Controllers
         }
 
         [HttpGet ("{id}")]
-        public List<Transfer> GetTransferById(int transferId)
+        public Transfer GetTransferById(int transferId)
         {
             return TransferDao.GetTransferById(transferId);
         }

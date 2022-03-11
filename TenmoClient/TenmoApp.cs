@@ -82,25 +82,31 @@ namespace TenmoClient
             if (menuSelection == 2)
             {
                 List<Transfer> transfers = tenmoApiService.GetTransfers();
-                Console.WriteLine("------------------------------------");
-                Console.WriteLine("Transfers");
-                Console.WriteLine();
-
-                foreach(Transfer transfer in transfers)
+                console.PrintTransferHistory(transfers, tenmoApiService.Username);
+                int transferId = console.PromptForInteger("Please enter transfer ID to view details (0 to cancel): ");
+                if(transferId != 0)
                 {
-                    
-                    Console.WriteLine(transfer.AccountFrom);
-                   
+                    bool transferInTransfers = false;
+                    Transfer transfer = new Transfer();
+                    foreach(Transfer transfer1 in transfers)
+                    {
+                        if (transfer1.TransferId == transferId)
+                        {
+                            transfer = transfer1;
+                            transferInTransfers = true;
+                        }
+                    }
+                    if (transferInTransfers)
+                    {
+                        console.PrintTransferDetails(transfer);
+                    }
+                    else
+                    {
+                        Console.WriteLine("No matching transfer in transfer history");
+                    }
                 }
-
-                int selection = console.PromptForInteger("Please enter transfer ID to view details (0 to cancel): ");
-
-                if (selection == 0)
-                {
-                    
-                }
-
-                Transfer selectedTransfer = tenmoApiService.GetTransferById(selection);
+                
+                console.Pause();
             }
 
             if (menuSelection == 3)
@@ -110,29 +116,14 @@ namespace TenmoClient
 
             if (menuSelection == 4)
             {
-                List<Account> accounts = tenmoApiService.GetAllAccountsExceptUser();
-                console.PrintUsernames(accounts);
-                int selection = console.PromptForInteger("Please select which account you would like to send to", 1, accounts.Count);
-                Account recipient = accounts[selection - 1];
+                Account recipient = GetAccountFromList("Please select which account you would like to send to");
                 decimal sendAmount = console.PromptForDecimal("Please enter the amount you would like to send");
-                if(sendAmount > 0 && sendAmount < tenmoApiService.GetAccount().Balance)
-                {
-                    bool fundsSuccessful = tenmoApiService.TransferFunds(recipient.UserId, sendAmount);
-                    if (fundsSuccessful)
-                    {
-                        Console.WriteLine($"{sendAmount:c2} successfully transfered to {recipient.UserName}");
-                        console.Pause();
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("transfer denied");
-                }
+                console.PrintTransferOutcome(tenmoApiService.TransferFunds(recipient.UserId, sendAmount));
             }
 
             if (menuSelection == 5)
             {
-                // Request TE bucks
+                Account requestee = GetAccountFromList("Please select which account you would like to request from");
             }
 
             if (menuSelection == 6)
@@ -196,6 +187,14 @@ namespace TenmoClient
                 console.PrintError("Registration was unsuccessful.");
             }
             console.Pause();
+        }
+        public Account GetAccountFromList(string message)
+        {
+            List<Account> accounts = tenmoApiService.GetAllAccountsExceptUser();
+            console.PrintUsernames(accounts);
+            int selection = console.PromptForInteger(message, 1, accounts.Count);
+            Account recipient = accounts[selection - 1];
+            return recipient;
         }
     }
 }
