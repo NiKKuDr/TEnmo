@@ -11,5 +11,6 @@ namespace TenmoServer.DAO
         public bool SendFunds(decimal transferAmount, int senderId, int recipientId);
         public List<Transfer> GetTransfers(int userId);
         public Account GetAccount(int id);
+        public Transfer GetTransferById(int transferId);
     }
 }

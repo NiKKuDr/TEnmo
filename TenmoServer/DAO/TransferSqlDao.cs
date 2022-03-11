@@ -111,10 +111,15 @@ namespace TenmoServer.DAO
                 {
                     conn.Open();
 
-                    SqlCommand cmd = new SqlCommand("SELECT t.transfer_type_id, t.transfer_status_id, t.transfer_id, t.account_to, t.account_from, t.amount " +
+                    SqlCommand cmd = new SqlCommand("SELECT t.transfer_type_id, t.transfer_status_id, t.transfer_id, t.account_to, t.account_from, t.amount, u.username " +
                         "FROM transfer t " +
                         "JOIN account a " +
                         "ON t.account_to = a.account_id OR t.account_from = a.account_id " +
+                        "JOIN tenmo_user u ON a.user_id = u.user_id " +
+                        "JOIN transfer_type ty " +
+                        "ON t.transfer_type_id = ty.transfer_type_id " +
+                        "JOIN transfer_status ts " +
+                        "ON t.transfer_status_id = ts.transfer_status_id " +
                         "WHERE (t.account_to = @accountId OR t.account_from = @accountID) AND a.user_id != @userId", conn);
                     cmd.Parameters.AddWithValue("@userId", userId);
                     cmd.Parameters.AddWithValue("@accountId", accountId);
@@ -129,6 +134,7 @@ namespace TenmoServer.DAO
                         transfer.AccountTo = Convert.ToInt32(reader["account_to"]);
                         transfer.AccountFrom = Convert.ToInt32(reader["account_from"]);
                         transfer.Amount = Convert.ToDecimal(reader["amount"]);
+                        transfer.OtherUserUsername = Convert.ToString(reader["username"]);
                         transfers.Add(transfer);
                     }
                 }
@@ -138,6 +144,39 @@ namespace TenmoServer.DAO
                 throw;
             }
             return transfers;
+        }
+        public Transfer GetTransferById(int transferId)
+        {
+            Transfer transfer = new Transfer();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand("SELECT * " +
+                        "FROM transfer " +
+                        "WHERE transferId = @transferId", conn);
+                    cmd.Parameters.AddWithValue("@transferId", transferId);
+                    
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        transfer.TransferId = Convert.ToInt32(reader["transfer_id"]);
+                        transfer.TransferType = Convert.ToInt32(reader["transfer_type_id"]);
+                        transfer.TransferStatus = Convert.ToInt32(reader["transfer_status_id"]);
+                        transfer.AccountTo = Convert.ToInt32(reader["account_to"]);
+                        transfer.AccountFrom = Convert.ToInt32(reader["account_from"]);
+                        transfer.Amount = Convert.ToDecimal(reader["amount"]);
+                    }
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+            return transfer;
         }
     }
 }

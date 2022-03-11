@@ -73,7 +73,10 @@ namespace TenmoClient
 
             if (menuSelection == 1)
             {
-                console.PrintBalance(tenmoApiService.GetAccount().Balance);
+                decimal balance = tenmoApiService.GetAccount().Balance;
+                Console.WriteLine($"Your current account balance is: ${balance}");
+                console.Pause();
+                //console.PrintBalance(tenmoApiService.GetAccount().Balance);
             }
 
             if (menuSelection == 2)

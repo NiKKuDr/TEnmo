@@ -16,4 +16,6 @@ namespace TenmoClient.Models
         public string TransferStatusDescription { get; set; }
         public string OtherUserUsername { get; set; }
     }
+
+
 }
