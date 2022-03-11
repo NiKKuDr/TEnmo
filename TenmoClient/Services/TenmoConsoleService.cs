@@ -66,7 +66,7 @@ namespace TenmoClient.Services
                 Console.WriteLine(accounts[i].UserName);
             }
         }
-        public void PrintTransferHistory(List<Transfer> transfers)
+        public void PrintTransferHistory(List<Transfer> transfers, string username)
         {
             Console.WriteLine("----------------Transfers----------------");
             Console.WriteLine("ID   From/To                    Amount   ");
@@ -74,15 +74,38 @@ namespace TenmoClient.Services
             foreach (Transfer transfer in transfers)
             {
                 Console.Write(transfer.TransferId + "   ");
-                if(transfer.TransferType == 1)
+                if (username == transfer.UserFrom)
                 {
-                    Console.Write("To:   " + transfer.OtherUserUsername);
+                    Console.Write("To:   " + transfer.UserTo);
                 }
-                else if(transfer.TransferType == 2)
+                else if(username == transfer.UserTo)
                 {
-                    Console.Write("From: " + transfer.OtherUserUsername);
+                    Console.Write("From: " + transfer.UserFrom);
                 }
-                Console.WriteLine($"{transfer.Amount:c2}");
+                Console.WriteLine($"\t\t{transfer.Amount:c2}");
+            }
+        }
+        public void PrintTransferDetails(Transfer transfer)
+        {
+            Console.WriteLine("----------------------------------------");
+            Console.WriteLine("            Transfer Details            ");
+            Console.WriteLine("----------------------------------------");
+            Console.WriteLine($"Id: {transfer.TransferId}");
+            Console.WriteLine($"From: {transfer.UserFrom}");
+            Console.WriteLine($"To: {transfer.UserTo}");
+            Console.WriteLine($"Type: {transfer.TransferType}");
+            Console.WriteLine($"Status: {transfer.TransferStatus}");
+            Console.WriteLine($"Amount: {transfer.Amount:c2}");
+        }
+        public void PrintTransferOutcome(Transfer transfer)
+        {
+            if (transfer != null)
+            {
+                Console.WriteLine($"{transfer.Amount:c2} sccessfully transfered to {transfer.UserTo}");
+            }
+            else
+            {
+                Console.WriteLine("transfer denied");
             }
         }
     }
