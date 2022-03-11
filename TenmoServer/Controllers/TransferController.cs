@@ -42,5 +42,11 @@ namespace TenmoServer.Controllers
         {
             return TransferDao.GetTransfers(GetUserIdFromToken());
         }
+
+        [HttpGet ("{id}")]
+        public List<Transfer> GetTransferById(int transferId)
+        {
+            return TransferDao.GetTransferById(transferId);
+        }
     }
 }

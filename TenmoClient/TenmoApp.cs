@@ -73,17 +73,34 @@ namespace TenmoClient
 
             if (menuSelection == 1)
             {
-                console.PrintBalance(tenmoApiService.GetAccount().Balance);
+                decimal balance = tenmoApiService.GetAccount().Balance;
+                Console.WriteLine($"Your current account balance is: ${balance}");
+                console.Pause();
+                //console.PrintBalance(tenmoApiService.GetAccount().Balance);
             }
 
             if (menuSelection == 2)
             {
                 List<Transfer> transfers = tenmoApiService.GetTransfers();
+                Console.WriteLine("------------------------------------");
+                Console.WriteLine("Transfers");
+                Console.WriteLine();
+
                 foreach(Transfer transfer in transfers)
                 {
+                    
                     Console.WriteLine(transfer.AccountFrom);
+                   
                 }
-                console.Pause();
+
+                int selection = console.PromptForInteger("Please enter transfer ID to view details (0 to cancel): ");
+
+                if (selection == 0)
+                {
+                    
+                }
+
+                Transfer selectedTransfer = tenmoApiService.GetTransferById(selection);
             }
 
             if (menuSelection == 3)
