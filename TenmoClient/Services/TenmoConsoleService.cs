@@ -66,5 +66,24 @@ namespace TenmoClient.Services
                 Console.WriteLine(accounts[i].UserName);
             }
         }
+        public void PrintTransferHistory(List<Transfer> transfers)
+        {
+            Console.WriteLine("----------------Transfers----------------");
+            Console.WriteLine("ID   From/To                    Amount   ");
+            Console.WriteLine("-----------------------------------------");
+            foreach (Transfer transfer in transfers)
+            {
+                Console.Write(transfer.TransferId + "   ");
+                if(transfer.TransferType == 1)
+                {
+                    Console.Write("To:   " + transfer.OtherUserUsername);
+                }
+                else if(transfer.TransferType == 2)
+                {
+                    Console.Write("From: " + transfer.OtherUserUsername);
+                }
+                Console.WriteLine($"{transfer.Amount:c2}");
+            }
+        }
     }
 }

@@ -78,11 +78,7 @@ namespace TenmoClient
 
             if (menuSelection == 2)
             {
-                List<Transfer> transfers = tenmoApiService.GetTransfers();
-                foreach(Transfer transfer in transfers)
-                {
-                    Console.WriteLine(transfer.AccountFrom);
-                }
+                console.PrintTransferHistory(tenmoApiService.GetTransfers());
                 console.Pause();
             }
 
