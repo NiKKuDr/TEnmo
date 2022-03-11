@@ -6,5 +6,7 @@ namespace TenmoServer.DAO
     public interface IAccountDao
     {
         Account GetAccount(int id);
+
+        List<Account> GetAllAccountsExceptUser(int id);
     }
 }

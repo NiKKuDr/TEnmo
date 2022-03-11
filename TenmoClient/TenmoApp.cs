@@ -73,14 +73,17 @@ namespace TenmoClient
 
             if (menuSelection == 1)
             {
-                Account account = (tenmoApiService.GetAccount());
-                Console.WriteLine(account.Balance);
-                console.Pause();
+                console.PrintBalance(tenmoApiService.GetAccount().Balance);
             }
 
             if (menuSelection == 2)
             {
-                // View your past transfers
+                List<Transfer> transfers = tenmoApiService.GetTransfers();
+                foreach(Transfer transfer in transfers)
+                {
+                    Console.WriteLine(transfer.AccountFrom);
+                }
+                console.Pause();
             }
 
             if (menuSelection == 3)
@@ -90,7 +93,24 @@ namespace TenmoClient
 
             if (menuSelection == 4)
             {
-                // Send TE bucks
+                List<Account> accounts = tenmoApiService.GetAllAccountsExceptUser();
+                console.PrintUsernames(accounts);
+                int selection = console.PromptForInteger("Please select which account you would like to send to", 1, accounts.Count);
+                Account recipient = accounts[selection - 1];
+                decimal sendAmount = console.PromptForDecimal("Please enter the amount you would like to send");
+                if(sendAmount > 0 && sendAmount < tenmoApiService.GetAccount().Balance)
+                {
+                    bool fundsSuccessful = tenmoApiService.TransferFunds(recipient.UserId, sendAmount);
+                    if (fundsSuccessful)
+                    {
+                        Console.WriteLine($"{sendAmount:c2} successfully transfered to {recipient.UserName}");
+                        console.Pause();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("transfer denied");
+                }
             }
 
             if (menuSelection == 5)

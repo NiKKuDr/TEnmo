@@ -23,7 +23,7 @@ namespace TenmoServer.DAO
                 {
                     conn.Open();
 
-                    SqlCommand cmd = new SqlCommand("SELECT * FROM account WHERE user_id = @id", conn);
+                    SqlCommand cmd = new SqlCommand("SELECT * FROM account WHERE user_id = @id;", conn);
                     cmd.Parameters.AddWithValue("@id", id);
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -40,6 +40,44 @@ namespace TenmoServer.DAO
                 throw;
             }
             return returnAccount;
+        }
+        public List<Account> GetAllAccountsExceptUser(int id)
+        {
+            List<Account> accounts = new List<Account>();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand("SELECT a.account_id, a.user_id, a.balance, tu.username FROM account a " +
+                        "JOIN tenmo_user tu " +
+                        "ON a.user_id = tu.user_id " +
+                        "WHERE a.user_id != @id", conn);
+                    cmd.Parameters.AddWithValue("@id", id);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Account account = new Account();
+                        account.AccountId = Convert.ToInt32(reader["account_id"]);
+                        account.UserId = Convert.ToInt32(reader["user_id"]);
+                        account.Balance = Convert.ToDecimal(reader["balance"]);
+                        account.UserName = Convert.ToString(reader["username"]);
+                        accounts.Add(account);
+                    }
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+            return accounts;
+        }
+        
+        public bool TransferFunds(int senderId, decimal transferAmount)
+        {
+            return false;
         }
     }
 }
