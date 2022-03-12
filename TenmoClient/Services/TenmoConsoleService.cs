@@ -139,7 +139,6 @@ namespace TenmoClient.Services
             {
                 Console.WriteLine("No pending transfers");
             }
-            Pause();
         }
     }
 }

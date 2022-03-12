@@ -90,7 +90,24 @@ namespace TenmoClient
 
             if (menuSelection == 3)
             {
-                console.PrintPendingTransfers(tenmoApiService.GetPendingTransfers());
+                List<StringifiedTransfer> transfers = tenmoApiService.GetPendingTransfers();
+                console.PrintPendingTransfers(transfers);
+                int transferId = console.PromptForInteger("Please enter transfer ID to view details (0 to cancel): ");
+                GetTransferDetails(transferId, transfers);
+                int selection = console.PromptForInteger("Would you like to approve(1) reject(2) or exit(0)", 0, 2);
+                if(selection == 1)
+                {
+                    StringifiedTransfer transfer = new StringifiedTransfer();
+                    transfer.TransferId = transferId;
+                    tenmoApiService.AcceptTransferRequest(transfer);
+                }
+                else if(selection == 2)
+                {
+                    StringifiedTransfer transfer = new StringifiedTransfer();
+                    transfer.TransferId = transferId;
+                    tenmoApiService.RejectTransferRequest(transfer);
+                }
+                console.Pause();
             }
 
             if (menuSelection == 4)

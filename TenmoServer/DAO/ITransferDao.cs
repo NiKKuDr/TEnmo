@@ -14,5 +14,7 @@ namespace TenmoServer.DAO
         public StringifiedTransfer GetTransferById(int transferId);
         public StringifiedTransfer RequestFunds(decimal transferAmount, int requesterId, int requestFromAccount);
         public List<StringifiedTransfer> GetPendingTransfers(int userId);
+        public StringifiedTransfer RejectTransferRequest(StringifiedTransfer transfer);
+        public StringifiedTransfer AcceptTransferRequest(StringifiedTransfer transfer);
     }
 }
