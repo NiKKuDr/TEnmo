@@ -20,7 +20,7 @@ namespace TenmoServer.Controllers
             TransferDao = transferDao;
         }
         [HttpPost("send")]
-        public Transfer SendFunds(TransferById transfer)
+        public StringifiedTransfer SendFunds(Transfer transfer)
         {
             return TransferDao.SendFunds(transfer.Amount, GetUserIdFromToken(), transfer.AccountTo);
         }
@@ -38,15 +38,25 @@ namespace TenmoServer.Controllers
             return userId;
         }
         [HttpGet]
-        public List<Transfer> GetTransfers()
+        public List<StringifiedTransfer> GetTransfers()
         {
             return TransferDao.GetTransfers(GetUserIdFromToken());
         }
 
         [HttpGet ("{id}")]
-        public Transfer GetTransferById(int transferId)
+        public StringifiedTransfer GetTransferById(int transferId)
         {
             return TransferDao.GetTransferById(transferId);
+        }
+        [HttpPost("request")]
+        public StringifiedTransfer RequestFunds(Transfer transfer)
+        {
+            return TransferDao.RequestFunds(transfer.Amount, GetUserIdFromToken(), transfer.AccountFrom);
+        }
+        [HttpGet("pending")]
+        public List<StringifiedTransfer> GetPendingTransfers()
+        {
+            return TransferDao.GetPendingTransfers(GetUserIdFromToken());
         }
     }
 }

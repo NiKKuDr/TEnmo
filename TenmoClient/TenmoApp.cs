@@ -81,49 +81,30 @@ namespace TenmoClient
 
             if (menuSelection == 2)
             {
-                List<Transfer> transfers = tenmoApiService.GetTransfers();
+                List<StringifiedTransfer> transfers = tenmoApiService.GetTransfers();
                 console.PrintTransferHistory(transfers, tenmoApiService.Username);
                 int transferId = console.PromptForInteger("Please enter transfer ID to view details (0 to cancel): ");
-                if(transferId != 0)
-                {
-                    bool transferInTransfers = false;
-                    Transfer transfer = new Transfer();
-                    foreach(Transfer transfer1 in transfers)
-                    {
-                        if (transfer1.TransferId == transferId)
-                        {
-                            transfer = transfer1;
-                            transferInTransfers = true;
-                        }
-                    }
-                    if (transferInTransfers)
-                    {
-                        console.PrintTransferDetails(transfer);
-                    }
-                    else
-                    {
-                        Console.WriteLine("No matching transfer in transfer history");
-                    }
-                }
-                
+                GetTransferDetails(transferId, transfers);
                 console.Pause();
             }
 
             if (menuSelection == 3)
             {
-                // View your pending requests
+                console.PrintPendingTransfers(tenmoApiService.GetPendingTransfers());
             }
 
             if (menuSelection == 4)
             {
                 Account recipient = GetAccountFromList("Please select which account you would like to send to");
                 decimal sendAmount = console.PromptForDecimal("Please enter the amount you would like to send");
-                console.PrintTransferOutcome(tenmoApiService.TransferFunds(recipient.UserId, sendAmount));
+                console.PrintTransferSendOutcome(tenmoApiService.TransferFunds(recipient.UserId, sendAmount));
             }
 
             if (menuSelection == 5)
             {
                 Account requestee = GetAccountFromList("Please select which account you would like to request from");
+                decimal requestAmount = console.PromptForDecimal("How much would you like to request?");
+                console.PrintTransferRequestOutcome(tenmoApiService.CreateTransferRequest(requestee.AccountId, requestAmount));
             }
 
             if (menuSelection == 6)
@@ -195,6 +176,30 @@ namespace TenmoClient
             int selection = console.PromptForInteger(message, 1, accounts.Count);
             Account recipient = accounts[selection - 1];
             return recipient;
+        }
+        public void GetTransferDetails(int transferId, List<StringifiedTransfer> transfers)
+        {
+            if (transferId != 0)
+            {
+                bool transferInTransfers = false;
+                StringifiedTransfer transfer = new StringifiedTransfer();
+                foreach (StringifiedTransfer transfer1 in transfers)
+                {
+                    if (transfer1.TransferId == transferId)
+                    {
+                        transfer = transfer1;
+                        transferInTransfers = true;
+                    }
+                }
+                if (transferInTransfers)
+                {
+                    console.PrintTransferDetails(transfer);
+                }
+                else
+                {
+                    Console.WriteLine("No matching transfer in transfer history");
+                }
+            }
         }
     }
 }
