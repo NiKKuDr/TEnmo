@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TenmoServer.Models
 {
-    public class Transfer
+    public class StringifiedTransfer
     {
         public int TransferId { get; set; }
         public string TransferType { get; set; }
@@ -14,7 +14,7 @@ namespace TenmoServer.Models
         public string UserFrom { get; set; }
         public decimal Amount { get; set; }
     }
-    public class TransferById
+    public class Transfer
     {
         public int TransferId { get; set; }
         public int TransferType { get; set; }

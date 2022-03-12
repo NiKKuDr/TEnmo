@@ -25,31 +25,49 @@ namespace TenmoClient.Services
             CheckForError(response);
             return response.Data;
         }
-        public Transfer TransferFunds(int accountToId, decimal transferAmount)
+        public StringifiedTransfer TransferFunds(int accountToId, decimal transferAmount)
         {
             RestRequest request = new RestRequest("transfer/send");
-            TransferById transfer = new TransferById();
+            Transfer transfer = new Transfer();
             transfer.AccountTo = accountToId;
             transfer.Amount = transferAmount;
             request.AddJsonBody(transfer);
-            IRestResponse<Transfer> response = client.Post<Transfer>(request);
+            IRestResponse<StringifiedTransfer> response = client.Post<StringifiedTransfer>(request);
             CheckForError(response);
             return response.Data;
         }
-        public List<Transfer> GetTransfers()
+        public List<StringifiedTransfer> GetTransfers()
         {
             RestRequest request = new RestRequest("transfer");
-            List<Transfer> transfers = new List<Transfer>();
-            IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
+            List<StringifiedTransfer> transfers = new List<StringifiedTransfer>();
+            IRestResponse<List<StringifiedTransfer>> response = client.Get<List<StringifiedTransfer>>(request);
             CheckForError(response);
             return response.Data;
         }
 
-        public Transfer GetTransferById(int transferId)
+        public StringifiedTransfer GetTransferById(int transferId)
         {
             RestRequest request = new RestRequest($"transfer/{transferId}");
+            StringifiedTransfer transfer = new StringifiedTransfer();
+            IRestResponse<StringifiedTransfer> response = client.Get<StringifiedTransfer>(request);
+            CheckForError(response);
+            return response.Data;
+        }
+        public StringifiedTransfer CreateTransferRequest(int requestAccountId, decimal transferAmount)
+        {
+            RestRequest request = new RestRequest("transfer/request");
             Transfer transfer = new Transfer();
-            IRestResponse<Transfer> response = client.Get<Transfer>(request);
+            transfer.AccountFrom = requestAccountId;
+            transfer.Amount = transferAmount;
+            request.AddJsonBody(transfer);
+            IRestResponse<StringifiedTransfer> response = client.Post<StringifiedTransfer>(request);
+            CheckForError(response);
+            return response.Data;
+        }
+        public List<StringifiedTransfer> GetPendingTransfers()
+        {
+            RestRequest request = new RestRequest("transfer/pending");
+            IRestResponse<List<StringifiedTransfer>> response = client.Get<List<StringifiedTransfer>>(request);
             CheckForError(response);
             return response.Data;
         }
