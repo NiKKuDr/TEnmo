@@ -71,5 +71,21 @@ namespace TenmoClient.Services
             CheckForError(response);
             return response.Data;
         }
+        public StringifiedTransfer RejectTransferRequest(StringifiedTransfer transfer)
+        {
+            RestRequest request = new RestRequest($"transfer/reject");
+            request.AddJsonBody(transfer);
+            IRestResponse<StringifiedTransfer> response = client.Put<StringifiedTransfer>(request);
+            CheckForError(response);
+            return response.Data;
+        }
+        public StringifiedTransfer AcceptTransferRequest(StringifiedTransfer transfer)
+        {
+            RestRequest request = new RestRequest($"transfer/accept");
+            request.AddJsonBody(transfer);
+            IRestResponse<StringifiedTransfer> response = client.Put<StringifiedTransfer>(request);
+            CheckForError(response);
+            return response.Data;
+        }
     }
 }

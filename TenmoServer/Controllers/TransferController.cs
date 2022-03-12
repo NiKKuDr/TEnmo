@@ -58,5 +58,15 @@ namespace TenmoServer.Controllers
         {
             return TransferDao.GetPendingTransfers(GetUserIdFromToken());
         }
+        [HttpPut("reject")]
+        public StringifiedTransfer RejectTransferRequest(StringifiedTransfer transfer)
+        {
+            return TransferDao.RejectTransferRequest(transfer);
+        }
+        [HttpPut("accept")]
+        public StringifiedTransfer AcceptTransferRequest(StringifiedTransfer transfer)
+        {
+            return TransferDao.AcceptTransferRequest(transfer);
+        }
     }
 }

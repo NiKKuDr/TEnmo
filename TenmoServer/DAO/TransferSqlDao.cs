@@ -282,5 +282,130 @@ namespace TenmoServer.DAO
             transfer = GetTransferById(transferId);
             return transfer;
         }
+        public StringifiedTransfer RejectTransferRequest(StringifiedTransfer transfer)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    {
+                        try
+                        {
+                            SqlCommand cmd = new SqlCommand("UPDATE transfer " +
+                                "Set transfer_status_id = 3 " +
+                                "WHERE transfer_id = @transferId", conn);
+                            cmd.Parameters.AddWithValue("@transferId", transfer.TransferId);
+                            cmd.ExecuteNonQuery();
+                        }
+                        catch (Exception exception2)
+                        {
+                            Console.WriteLine("Commit Exception Type: {0}", exception2.GetType());
+                            Console.WriteLine("  Message: {0}", exception2.Message);
+
+                            return null;
+                        }
+
+                    }
+                }
+            }
+            catch (SqlException exception)
+            {
+                Console.WriteLine(exception.Message);
+                return null;
+            }
+            transfer = GetTransferById(transfer.TransferId);
+            return transfer;
+        }
+        public StringifiedTransfer AcceptTransferRequest(StringifiedTransfer transfer)
+        {
+            transfer = GetTransferById(transfer.TransferId);
+            if (transfer.Amount <= 0 || GetAccountFromUsername(transfer.UserFrom).Balance < transfer.Amount)
+            {
+                return null;
+            }
+            else
+            {
+                Account fromAccount = GetAccountFromUsername(transfer.UserFrom);
+                Account toAccount = GetAccountFromUsername(transfer.UserTo);
+                try
+                {
+                    using (SqlConnection conn = new SqlConnection(connectionString))
+                    {
+                        conn.Open();
+                        using (TransactionScope transaction = new TransactionScope())
+                        {
+                            try
+                            {
+                                SqlCommand cmd = new SqlCommand("UPDATE account SET balance = balance - @transferAmount WHERE user_id = @senderId;", conn);
+                                cmd.Parameters.AddWithValue("@senderId", fromAccount.UserId);
+                                cmd.Parameters.AddWithValue("@transferAmount", transfer.Amount);
+                                cmd.ExecuteNonQuery();
+
+                                cmd = new SqlCommand("UPDATE account SET balance = balance + @transferAmount WHERE user_id = @recipientId;", conn);
+                                cmd.Parameters.AddWithValue("@recipientId", toAccount.UserId);
+                                cmd.Parameters.AddWithValue("@transferAmount", transfer.Amount);
+                                cmd.ExecuteNonQuery();
+
+                                cmd = new SqlCommand("UPDATE transfer " +
+                                    "Set transfer_status_id = 2 " +
+                                    "WHERE transfer_id = @transferId", conn);
+                                cmd.Parameters.AddWithValue("@transferId", transfer.TransferId);
+                                cmd.ExecuteNonQuery();
+
+                                transaction.Complete();
+                            }
+                            catch (Exception exception2)
+                            {
+                                Console.WriteLine("Commit Exception Type: {0}", exception2.GetType());
+                                Console.WriteLine("  Message: {0}", exception2.Message);
+                                transaction.Dispose();
+
+                                return null;
+                            }
+
+                        }
+                    }
+                }
+                catch (SqlException exception)
+                {
+                    Console.WriteLine(exception.Message);
+                    return null;
+                }
+            }
+            transfer = GetTransferById(transfer.TransferId);
+            return transfer;
+        }
+        public Account GetAccountFromUsername(string username)
+        {
+            Account returnAccount = new Account();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand("SELECT * " +
+                        "FROM account a " +
+                        "JOIN tenmo_user tu " +
+                        "ON a.user_id = tu.user_id " +
+                        "WHERE tu.username = @username", conn);
+                    cmd.Parameters.AddWithValue("@username", username);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        returnAccount.AccountId = Convert.ToInt32(reader["account_id"]);
+                        returnAccount.UserId = Convert.ToInt32(reader["user_id"]);
+                        returnAccount.Balance = Convert.ToDecimal(reader["balance"]);
+                    }
+                }
+            }
+            catch (SqlException)
+            {
+                throw;
+            }
+            return returnAccount;
+        }
     }
 }
